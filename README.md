@@ -21,7 +21,7 @@
 4. **技术派专属学习圈子**：[不走弯路，少采坑，附 120 篇技术派全套教程](https://paicoding.com/article/detail/17) 
 5. **派聪明AI助手**：AI 时代，怎能掉队，欢迎体验 [技术派的派聪明 AI 助手](https://paicoding.com/chat)
 6. **码云仓库**：[https://gitee.com/itwanger/paicoding](https://gitee.com/itwanger/paicoding) （国内访问速度更快）
-  我是玥殇大王666
+
 ## 二、项目介绍
 
 ### 项目演示
