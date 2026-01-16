@@ -1,0 +1,18 @@
+日期：2026-01-16
+Day：D2
+完成内容：
+- Docker：启动 MySQL(3306) + Redis(6379)
+- 配置：dev 环境 application-dal.yml 补齐 MySQL 密码 root；确认 database.name=pai_coding
+- 启动：IDEA 运行 QuickForumApplication，程序实参 --spring.profiles.active=dev
+- 成功访问：http://127.0.0.1:9587/ （8080 被占用自动换端口）
+
+关键日志：
+- The following 1 profile is active: "dev"
+- Tomcat started on port(s): 9587 (http)
+- Started QuickForumApplication in xx seconds
+
+踩坑复盘：
+1) package 测试失败：测试需要数据库，先跳过/先起 MySQL/Redis
+2) Access denied (using password: NO)：application-dal.yml password 为空 -> 补 root
+3) DATABASECHANGELOG 不存在：启动时先查 changelog -> 创建 DATABASECHANGELOG/DATABASECHANGELOGLOCK 后启动成功
+
