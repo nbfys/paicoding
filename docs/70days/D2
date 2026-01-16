@@ -16,3 +16,11 @@ Day：D2
 2) Access denied (using password: NO)：application-dal.yml password 为空 -> 补 root
 3) DATABASECHANGELOG 不存在：启动时先查 changelog -> 创建 DATABASECHANGELOG/DATABASECHANGELOGLOCK 后启动成功
 
+启动入口：QuickForumApplication（点 Run）
+配置入口：paicoding-web/resources/application.yml（import 其他 yml）
+dev 配置：resources-env/dev/application-dal.yml（MySQL/Redis 连接）
+依赖服务：infra/docker-compose.yml（启动 MySQL/Redis）
+数据库名：application.yml -> database.name = pai_coding
+迁移工具：Liquibase（master.xml），会用 DATABASECHANGELOG 记录版本
+访问入口：以日志 Tomcat started port 为准（本次是 9587）
+停止方式：IDEA 点 Stop（服务常驻不退出）
