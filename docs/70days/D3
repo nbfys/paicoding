@@ -1,0 +1,33 @@
+📝 D3 学习日志｜2026-01-17｜破除迷雾，掌控调试
+1. 🎯 今日核心里程碑
+状态转变：从面对几千个文件的“一头雾水”，转变为知道“只看哪三个文件夹”的从容。
+技能突破：学会了用 IDEA Debug（调试） 模式透视代码运行的全过程，不再靠猜。
+2. 💻 项目实战（深度调试）
+接口体验：通过 Swagger (Knife4j) 成功向后端发送了 /login POST 请求。
+全链路追踪：
+Controller 层（服务员）：在 LoginRestController 拦截到了请求，亲眼看到 username 参数被传入。
+Spring 代理陷阱：按 F7 进入 Service 时遇到了 CglibAopProxy，明白了这是 Spring AOP（切面）在做“安保工作”，学会了用 断点+F9 跳过代理直接进入业务逻辑。
+Service 层（厨师）：在 LoginServiceImpl 中验证了逻辑。当输入乱码账号时，亲眼看到 userDao 返回 null，导致程序抛出异常。
+架构理解：
+paicoding-web = 前台入口（Controller）。
+paicoding-service = 核心厨房（Service + Dao）。
+External Libraries = 此时无需关心的外部工具箱。
+3. ☕️ Java 核心知识
+Lombok 神器：
+@Data：自动生成 Getter/Setter，解释了为什么代码里没写方法却能调用。
+@Slf4j：自动生成 log 对象，打印日志专用。
+@Builder：像拼积木一样优雅地创建对象。
+文件后缀扫盲：
+明白了 .idea, .mvn, target 等是机器生成的文件，开发时可以直接折叠/无视。
+核心关注点锁定在 src/main/java 和 pom.xml。
+4. 🧠 算法思维（链表）
+思维转换：从 C++ 指针（内存地址操作）转向 Java 引用（对象操纵）。
+题目：反转链表。
+关键点：注意 null 指针异常 (NPE)，理解 next 是引用的传递。
+5. 📢 自我总结
+“以前觉得几千个文件的项目像迷宫，今天学会了看地图。原来真正干活的代码就藏在 service 和 web 模块里。亲眼看到变量在 Debug 面板里变化的感觉太爽了，我不再是被代码玩，而是我在玩代码！”
+
+🚀 D4 预告（明日计划）
+挑战升级：今天只看了“登录失败（查不到人）”，明天我们要去注册一个真实用户，让数据真正写入数据库（MySQL）。
+SQL 入门：看看 Dao 层到底是怎么把 Java 对象变成 SQL 语句的（MyBatis XML 解析）。
+Coach 评价：今天的进度非常扎实！你不仅跑通了流程，还触碰到了 Spring AOP 这种中高级原理。保持这个好奇心，明天继续“拆解”它！
