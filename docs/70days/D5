@@ -1,0 +1,33 @@
+📝 D5 学习日志｜2026-01-19｜Hello World 重启
+1. 🎯 今日核心里程碑
+心态重建：成功摆脱了复杂项目的报错泥潭，在一个干净的环境里找回了“掌控感”。
+0 到 1 突破：亲手使用 Spring Initializr 创建了第一个 Spring Boot 项目，并成功运行。
+原理洞察：
+通过 Port 8080 already in use 报错，深刻理解了 Tomcat 默认端口机制。
+通过对比 paicoding 的自动换端口代码，明白了“自动化”背后的代码逻辑。
+2. 💻 项目实战（Hello World）
+动作：
+新建项目 day5-hello，只勾选 Spring Web 依赖。
+编写 HelloController，使用 @RestController 和 @GetMapping。
+遇到 8080 端口占用报错，通过修改 application.properties 为 8081 解决。
+成果：
+浏览器访问 http://localhost:8081/hello，成功显示 "Hello World! D5 任务达成！"。
+3. 🧠 知识点复盘
+Spring Boot 注解：
+@RestController：告诉 Spring “我是个服务员，把我的返回值直接给浏览器”。
+@GetMapping("/hello")：告诉 Spring “如果有人访问 /hello，就执行这个方法”。
+端口冲突：
+Web 服务必须独占一个端口（默认 8080）。
+如果冲突，要么杀掉占用的进程，要么自己换端口（修改配置文件）。
+4. 🧩 算法与八股（保留习惯）
+算法：复习了链表快慢指针思想（用于判环和找中点）。
+八股：HTTP 状态码。
+200：OK，一切正常（Hello World 出来了）。
+404：Not Found（地址输错成了 /helo）。
+500：Server Error（Java 代码抛异常了）。
+5. 👣 下次开始第一步 (D6)
+目标：不仅要回字符串，还要回 JSON 数据（模拟真实 API）。
+动作：
+创建一个 User 类。
+让 Controller 返回 new User("Tom", 18)。
+观察浏览器里它是怎么自动变成 {"name": "Tom", "age": 18} 的。
