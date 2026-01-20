@@ -1,0 +1,32 @@
+📝 D6 学习日志｜2026-01-20｜数据魔法：从对象到 JSON
+1. 🎯 今日核心里程碑
+后端核心打通：成功实现了 Java Object -> JSON 的自动转换。这是前后端分离开发中最基础也最重要的机制（基于 Jackson）。
+原理探究：
+通过实验（User@xxxx 乱码），理解了 Java toString() 的默认行为。
+理解了 Spring Boot 是通过调用对象的 Getter 方法来生成 JSON 键值对的。
+技能树点亮：
+熟练使用 IDEA 快捷键 (Alt+Insert) 自动生成 Getter/Setter/Constructor。
+在不依赖复杂框架的情况下，手写出了符合规范的 POJO (User 类)。
+2. 💻 项目实战（接口升级）
+动作：
+创建 User.java 实体类，包含 name, age 属性。
+在 HelloController 中新增 /user 接口，返回 new User(...)。
+加练挑战：实现了 /users/all 接口，返回 List<User>，观察到了 JSON 数组 [{...}, {...}] 的结构。
+成果：
+浏览器访问接口，不再显示死板字符串，而是标准的 JSON 数据格式。
+3. 🧩 算法复盘
+题目 1：二叉树的最大深度 (LeetCode 104) ✅
+核心：递归。Depth = max(Left, Right) + 1。
+坑点：本地写代码时误导入了 javax.swing.tree.TreeNode，学会了在本地手写内部类 TreeNode 来模拟力扣环境。
+题目 2：二叉树中序遍历（部分涉及）
+初步建立了树形结构的递归思维。
+4. 📇 八股卡片（今日补习）
+题目：JSON 是什么？
+回答：
+定义：JavaScript Object Notation（JS 对象简谱）。
+作用：轻量级的数据交换格式（前后端通信的普通话）。
+结构：键值对 {"key": value}，数组 [...]。
+Java对应：Java 对象通过序列化（Serialization）变成 JSON 字符串。
+5. 👣 下次开始第一步 (D7)
+方向：交互升级。从“服务器说”变成“浏览器说”（POST 请求）。
+工具：安装 Postman/Apifox，引入 Lombok 神器解放双手。
