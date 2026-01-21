@@ -1,0 +1,41 @@
+📝 D7 学习日志｜2026-01-21｜交互升级与工程化起步
+1. 🎯 今日核心里程碑
+交互闭环：成功实现了 Client -> Server 的双向数据传输（POST 请求 + JSON 接收）。
+工程化升级：
+引入 Lombok (@Data)，彻底告别了手写 Getter/Setter 的繁琐时代。
+引入 Slf4j (log.info)，告别了 System.out.println 的业余时代。
+工具链完善：
+学会了使用 IDEA HTTP Client (.http) 进行接口测试。
+准备好了 Apifox，为复杂接口管理做好了准备。
+2. 💻 项目实战（交互升级）
+动作：
+在 pom.xml 中正确引入 Lombok 依赖（学会了如何修复 groupId 标签错误）。
+重构 User.java，使用 @Data 注解简化代码，并通过 Structure 面板验证了其原理。
+编写 /user/echo 接口，使用 @PostMapping 和 @RequestBody 接收前端 JSON。
+成果：
+发送 {"age": 30}，成功返回 {"age": 31}。
+控制台规范打印出日志信息。
+3. 🧠 知识点复盘
+注解原理：
+@RequestBody：将 HTTP Body 里的 JSON 数据映射为 Java 对象（加工厂模式）。
+@Data：编译时自动生成样板代码（Getter/Setter/toString）。
+接口设计：
+无参方法 getUser()：数据由后端生成（生产者）。
+有参方法 echoUser(...)：数据由前端传入（加工者）。
+4. 📇 八股卡片（今日核心）
+题目：@RequestBody vs @RequestParam 的区别
+回答：
+用途：@RequestBody 接收 JSON Body；@RequestParam 接收 URL 参数（?k=v）。
+类型：@RequestBody 常用 POST/PUT；@RequestParam 常用 GET。
+数量：@RequestBody 只能有 1 个；@RequestParam 可以有多个。
+格式：@RequestBody 对应 application/json；@RequestParam 对应表单格式。
+映射：@RequestBody 转复杂对象 (User)；@RequestParam 转基本类型 (int/String)。
+5. 🧩 算法复盘
+题目 1：合并两个有序链表 (LeetCode 21) ✅
+核心：双指针（Dummy Node 哨兵节点技巧）。
+题目 2：反转链表 (复习) ✅
+保持了手写代码的手感。
+6. 👣 下次开始第一步 (D8)
+方向：数据持久化。
+痛点：现在的 User 都是内存里 new 出来的，一重启就没了。
+目标：接入数据库 (MyBatis)。真正把 User 存进 MySQL 里，重启也在。
