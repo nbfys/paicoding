@@ -1,0 +1,27 @@
+A. 算法（两题并做）
+
+题目 1：删除排序链表中的重复元素 (LeetCode 83) —— 简单热身，5分钟搞定。
+题目 2：移除链表元素 (LeetCode 203) —— 用到虚拟头结点 (Dummy Node) 技巧。
+要求：集中时间刷完，手写通过并截图。
+B. Java & 八股（快速过）
+
+Java：JDBC 是手动挡车，MyBatis 是自动挡车，MyBatis-Plus 是自动驾驶。知道这个递进关系即可。
+八股：ACID（原子性 Atomicity 最重要：转账要么都成功，要么都失败）。
+C. 项目（重头戏：打通数据库）
+
+Step 1：装装备 (D8)。引入 MySQL 和 MyBatis 依赖。
+Step 2：连金库 (D8)。配置 application.properties 连接你的 Docker MySQL。
+Step 3：原生体验 (D8)。
+建表 simple_user。
+写一个 UserMapper，用 @Select("SELECT * FROM simple_user") 查数据。
+验收：浏览器能查出你手动插在表里的数据。
+Step 4：提效升级 (D9)。     未完成
+引入 mybatis-plus-boot-starter。
+让 UserMapper 继承 BaseMapper。
+验收：不需要写 SQL，直接调用 userMapper.insert() 实现插入。
+
+最大的问题是mybatis依赖问题，询问ai让我进行版本更换，连续两次更换后又让我配置阿里云镜像。
+接着卡在这一步聊天额度不够，卡了很久后自己在CSDN搜索报错内容，发现问题确实是mybatis依赖版本问题。
+但是，ai给出的版本已经不在依赖库中，自己去https://mvnrepository.com/找到了mybatis-spring-boot-starter的最新版本4.0.1
+运行成功了，在浏览器中查看到了自己在数据库存储的信息。
+打通Request -> Controller -> Mapper -> Database -> Mapper -> Controller -> Response。
