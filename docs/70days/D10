@@ -1,0 +1,24 @@
+📝 D10 学习日志｜2026-02-18｜透视底层，精准狙击
+1. 🎯 今日核心里程碑
+状态转变：从只会盲目调用 API 的“自动驾驶”模式，升级为能看到底层 SQL 语句的“透视”模式。
+技能突破：掌握了 MyBatis-Plus 的核心武器 Wrapper（条件构造器），彻底告别了 C++ 时代手动拼接 SQL 字符串的原始做法。
+报错解决：遇到了 Spring Boot 版本与 MP 日志配置不兼容的问题，学会了通过调整 Log Level (logging.level) 绕过冲突，达成目的。
+2. 💻 项目实战（MP 进阶）
+开启“透视挂” (SQL 日志)：
+问题：尝试使用 StdOutImpl 时遭遇版本不兼容报错。
+解决：采用原生 Spring Boot 日志配置方案 (logging.level.com.example.demo.mapper=DEBUG)。
+收获：成功在控制台捕获到了 Preparing: SELECT...，亲眼验证了 MP 帮我生成的 SQL 语句，心里更有底了。
+掌握“狙击枪” (LambdaQueryWrapper)：
+场景：不再是无脑查所有，而是实现了 /users/search 接口，按姓名模糊查、按年龄范围查。
+核心技法：
+LambdaQueryWrapper<User>：用 Java 对象的方式组装 SQL。
+User::getName：方法引用。相比于写死字符串 "name"，这种写法如果有拼写错误，编译期就会报错（强类型语言的优势）。
+动态 SQL：wrapper.like(StringUtils.hasText(name), ...)，一行代码搞定“如果有值就查，没值就忽略”的逻辑，极其优雅。
+3. ☕️ Java & 数据库八股
+ORM 的本质：深刻体会到 Object-Relational Mapping 的爽点——在 Java 代码里操作的是 Class 和 Method，生成的却是 Database 认识的 SQL。
+事务隔离级别 (ACID)：
+复习了四大级别：读未提交（脏读）、读已提交、可重复读（MySQL 默认）、串行化。
+重点记住了 原子性 (Atomicity)：要么全成功，要么全失败，转账场景的生命线。
+4. 🧠 算法思维（链表回归）
+题目：反转链表 (LeetCode 206)。
+感悟：作为链表基本功的终极测试，再次强化了对 Java 引用传递的理解。虽然 Java 没有 * 和 &，但在操作 next 指针时，逻辑与 C++ 是一致的：保存 curr，暂存 next，断链重连 prev。
