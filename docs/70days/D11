@@ -1,0 +1,25 @@
+📝 D11 学习日志｜2026-02-19｜正规军整编：三层架构重构
+1. 🎯 今日核心成就
+架构升级：成功将原本杂乱的“Controller 直连 Mapper”模式，重构为企业标准的 Controller -> Service -> Mapper 三层架构。
+职责分离：Controller 变轻（只传话），Service 变重（写逻辑），Mapper 隐身（只供 Service 驱使）。
+代码规范：纠正了“接口不能 implements”的初学者错误，明确了 Class 实现 Interface 的语法规则。
+2. 💻 代码大换血 (Refactoring)
+Before (脏乱差)：Controller 里直接注入 Mapper，还堆满了 LambdaQueryWrapper 这种数据库细节代码。
+After (标准化)：
+新建 UserService (接口)：定义业务标准。
+新建 UserServiceImpl (实现类)：承接所有 Wrapper 组装逻辑，并加上 @Service 注解。
+清洗 HelloController：删掉 Mapper，注入 Service，方法体内只剩一行调用代码。
+3. 🧠 算法思维 (链表双雄)
+题目：合并两个有序链表 (LeetCode 21)。
+核心思路：“穿针引线法”。
+创建一个 dummy 虚拟头结点作为新链表的“线头”。
+用 curr 指针当针，比较 l1 和 l2 的值，谁小就把谁串起来 (curr.next = l1)，然后那个链表向后移 (l1 = l1.next)。
+最后检查哪个链表还有剩，直接把剩下的整串接在后面。
+代码手感：再次强化了 dummy 节点处理边界情况（如空链表）的优势，这是链表题的通解神器。
+4. ☕️ Java 八股 (Spring 灵魂)
+IOC (控制反转)：
+理解：不再手写 new UserServiceImpl()，而是把创建对象的权利交给 Spring 容器。需要用的时候，加个 @Resource 或 @Autowired，Spring 就会自动把对象注入进来。
+好处：解耦。换个厨师（实现类），服务员（Controller）不用改代码。
+AOP (面向切面)：
+理解：像切蛋糕一样，在不修改原有业务代码（纵向）的情况下，横向切入一些通用逻辑（如日志记录、权限校验、事务管理）。
+场景：D10 里开启的 SQL 日志，其实就是一种 AOP 的体现。
