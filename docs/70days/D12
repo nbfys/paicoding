@@ -1,0 +1,24 @@
+📝 D12 学习日志｜2026-02-20｜统一协议与自我验证
+1. 🎯 今日核心成就
+统一对外形象 (Result<T>)：制定了全局响应标准（Code + Msg + Data）。现在无论成功还是失败，接口返回的 JSON 格式都整齐划一，前端同学看了直呼内行。
+构筑安全防线 (GlobalExceptionHandler)：利用 @RestControllerAdvice 实现了全局异常兜底。即使是 404 Not Found 或 1/0 这种系统级错误，也被优雅地转换成了 JSON，没有暴露丑陋的错误堆栈。
+独立实战通关 (Book 模块)：（最重要的一点） 脱离教程代码，依靠对架构的理解，徒手搭建了 Book 实体、BookMapper、BookService 和 BookController，并成功打通数据库插入操作。
+2. 💻 技术细节与避坑指南
+Result 泛型设计：
+Result<T> 的 T 可以是 User，也可以是 List<User>，体现了 Java 泛型的灵活性。
+静态方法 Result.success(data) 极大地简化了代码调用。
+实例调用 vs 静态调用：
+错误：BookService.addbook() (尝试用接口名调用非静态方法)。
+修正：bookService.addbook() (使用 @Resource 注入的实例对象调用)。
+感悟：深刻理解了 Spring IOC 的本质——我们使用的是容器帮我们 new 好的对象实例。
+404 拦截之谜：
+发现 GlobalExceptionHandler 甚至能捕获 NoResourceFoundException (404)，证明了 Spring 的异常处理机制覆盖面极广。
+3. 🧠 算法与基础
+算法：环形链表 (LeetCode 141)。掌握了快慢指针 (Floyd 判圈算法)，理解了 fast 指针一次走两步终会追上 slow 的数学原理。
+八股：HTTP 状态码。熟记了 200 (OK), 404 (Not Found), 500 (Server Error) 等核心状态码，并理解了我们自定义的 code=0/-1 与 HTTP 状态码的区别（一个是业务状态，一个是协议状态）。
+4. 🚀 下一步 (D13 预告)
+目前的 Book 接口虽然通了，但还很脆弱：
+
+如果我传 { "title": "", "price": -100 }，它也会傻傻地存进数据库。
+如果我想删除一本书，但又想保留数据做备份（逻辑删除），该咋办？
+D13 任务：参数校验 (@Valid) 与 逻辑删除 (@TableLogic)。我们要给 Book 模块加上严密的安检门和后悔药！
