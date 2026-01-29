@@ -1,0 +1,40 @@
+📝 D13-D14 学习日志｜2026-02-21｜健壮性与高性能
+1. 🎯 核心里程碑
+D13 安全防线：堵住了数据校验的漏洞（@Valid），并实现了企业标配的逻辑删除（后悔药），确保数据“删而不丢”。
+D14 性能起飞：引入了 MyBatis-Plus 分页插件，实现了标准的 page/size 查询模式，彻底解决了海量数据导致接口崩溃的隐患。
+2. 💻 技术深度解析
+A. 逻辑删除 (Logical Delete) —— "假装看不见"
+配置：@TableLogic 标注字段（如 deleted）。
+原理：
+删 (Delete)：MP 拦截 deleteById(5) -> 偷换 SQL 为 UPDATE ... SET deleted=1 WHERE id=5。
+查 (Select)：MP 拦截 selectList() -> 偷加条件 WHERE deleted=0。
+价值：Java 业务层完全无感知，就像在操作普通数据一样，但底层却保留了数据备份，防止误删事故。
+B. 数据校验 (Validation) —— "拒敌于门外"
+配置：spring-boot-starter-validation + 实体类注解（@NotBlank, @Min(0)）。
+生效点：Controller 方法参数前的 @Valid。
+价值：如果参数非法，请求连 Controller 的第一行代码都进不去，直接在框架层被拦截，保护了后续逻辑和数据库的安全。
+C. 分页查询 (Pagination) —— "弱水三千，只取一瓢"
+配置：MybatisPlusConfig 中注入 PaginationInnerInterceptor。
+原理：
+传入 Page 对象后，MP 会自动识别并执行两步操作：
+执行 COUNT(*) 查询总数（用于前端计算页码条）。
+执行 LIMIT offset, size 查询当前页数据。
+返回结构 (IPage)：
+JSON
+
+{
+  "current": 1,  // 当前第几页
+  "size": 10,    // 每页几条
+  "total": 52,   // 数据库里总共有多少条满足条件的数据
+  "records": [...] // 当前页的真实数据列表
+}
+3. 🧠 算法与八股
+算法：
+链表中点 (LeetCode 876) & 回文链表 (LeetCode 234)。
+核心都是 快慢指针：快指针走 2 步，慢指针走 1 步。这种思维不仅用于找中点，还用于判环（D12）。
+八股：
+GET vs POST：GET 读（参数在 URL），POST 写（参数在 Body）。
+逻辑删除：软删除 vs 硬删除的区别，面试必问场景题。
+4. 🚀 经验教训 (Troubleshooting)
+报错分析：D13 遇到 Duplicate entry 报错，明白了如果 @Valid 没生效或请求绕过了校验，脏数据冲进数据库会引发底层异常。
+插件机制：明白 MP 的很多高级功能（分页、乐观锁等）都需要通过 Interceptor（拦截器）插件来激活，否则它们就是死的。
