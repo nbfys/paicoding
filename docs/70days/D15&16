@@ -1,0 +1,32 @@
+📝 D15-D16 学习日志｜2026-02-23｜从性能压测到 AI 觉醒
+1. 🎯 核心里程碑
+性能验收 (D15)：
+动作：使用 Apifox/IDEA HTTP Client 对分页接口进行了 50 次循环压测。
+结果：0 失败，平均响应 11ms。
+意义：证明了之前搭建的架构（数据库连接池、MP 分页）在并发下是稳健的，项目达到了“可交付”标准。
+AI 接入 (D16)：
+动作：成功接入 Spring AI Alibaba，打通了 Java 代码与 通义千问 (Qwen) 大模型的对话链路。
+结果：访问 /ai/chat 接口，收到了 AI 的自我介绍。
+意义：项目正式拥有了“智能大脑”，从传统的 CRUD 升级为 AI Native 应用。
+2. 💣 踩坑与填坑 (Dependency Hell)
+这一天最宝贵的财富不是代码，而是处理版本冲突的经验：
+
+Spring Boot 4 的陷阱：
+现象：启动报错 RestClientAutoConfiguration not present。
+原因：Spring Boot 4.0.1 太超前，阿里 AI 组件还没适配。
+解决：果断降级到 Spring Boot 3.4.2（主流稳定版）。
+MyBatis-Plus 的变体：
+现象：降级 Spring Boot 后，数据库连接配置失效 (Property 'sqlSessionFactory' required)。
+原因：旧的 starter 是针对 Boot 4 的。
+解决：更换为 mybatis-plus-spring-boot3-starter (3.5.14)，精准匹配 Boot 3 环境。
+Maven 幽灵缓存：
+现象：明明仓库有版本，Maven 却一直报 Could not find artifact。
+解决：物理删除 .m2/repository 下的缓存文件夹，强制 Maven 重新下载。
+3. 🧠 技术沉淀
+Spring AI 架构：
+面向 ChatModel 编程，而不是面向具体的 API 编程。这让代码具备了极强的可移植性（未来换 DeepSeek 或 OpenAI 也就是改行配置的事）。
+压测思维：
+不要盲目自信，上线前必须做 Stress Test。哪怕是简单的循环调用，也能暴露数据库连接池满、内存溢出等隐患。
+🚀 下一步 (D17)
+现在的 AI 还只是个“陪聊”。
+明天，我们要利用 Prompt Template (提示词模板)，给 AI 戴上“图书管理员”的帽子，让它根据我们的指令干活。
