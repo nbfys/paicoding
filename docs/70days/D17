@@ -1,0 +1,29 @@
+📝 D17 项目总结：Prompt Engineering 实战
+1. 🎯 核心目的 (Purpose)
+摆脱硬编码：从简单的“你问我答”进化为**“场景化问答”**。我们需要让 AI 扮演特定角色（图书管理员），并遵循特定的业务逻辑（格式约束、内容风格）。
+标准化开发：学习 Spring AI 的 PromptTemplate 机制，掌握如何将用户输入（变量）动态注入到预设的提示词模板中，这是开发复杂 AI 应用的基础。
+环境稳固：解决端口冲突和路径映射问题，确保服务运行环境的稳定性。
+2. 🔨 实施过程 (Actions)
+环境修复：
+将服务端口从默认的 8080 修改为 8081，避开系统端口冲突。
+修正了 AiController 的注解结构，统一使用 @RequestMapping("/ai") 管理接口前缀，解决了 404 No static resource 问题。
+代码重构：
+在 AiController 中引入了 ChatClient（Fluent API）替代基础的 ChatModel。
+实现了 /ai/recommend 接口。
+模板实现：
+利用 Java 15+ 的 Text Blocks (""") 编写清晰的多行提示词。
+使用 PromptTemplate 定义带占位符（{category}）的模板。
+使用 Map.of() 进行参数动态填充，生成最终发送给 LLM 的 Prompt。
+3. 💡 关键成果 (Result)
+接口可用：成功上线 GET /ai/recommend?category=xxx 接口。
+输出达标：AI 能够根据传入的分类（如“哲学”、“科幻”），严格按照 《书名》：推荐语 的格式返回 3 本推荐书籍。
+示例响应：
+text
+
+《三体》：中国科幻基石，宏大的宇宙社会学图景令人震撼。
+《银河系漫游指南》：英式幽默科幻经典，不要恐慌，带上毛巾去旅行。
+《沙丘》：太空歌剧的巅峰，权谋、宗教与生态的史诗交响。
+4. 🧠 经验沉淀 (Key Takeaways)
+Prompt 决定下限：AI 的回答质量高度依赖 Prompt 的质量。明确的角色设定（Role）、**上下文（Context）和约束条件（Constraints）**是必不可少的。
+Controller 规范：@RequestMapping 在类级别定义前缀，@GetMapping 在方法级别定义动作，这种分层结构能有效避免路径混乱。
+调试技巧：遇到 404 时，先检查服务是否启动（日志），再检查路径拼写，最后检查注解映射。
