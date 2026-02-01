@@ -1,0 +1,28 @@
+📝 D18 项目总结：Structured Output (结构化输出)
+1. 🎯 核心目的 (Purpose)
+数据标准化：将 AI 生成的非结构化自然语言（String）转换为结构化数据（JSON/Java Object）。
+前后端分离适配：前端组件（如列表渲染 v-for）需要确定的字段名（title, reason），而不是一段模糊的文本。
+自动化解析：消除手动编写正则表达式解析 AI 回复的痛苦，利用框架能力自动完成反序列化。
+2. 🔨 实施过程 (Actions)
+DTO 定义：使用 JDK 17 的 record BookRecommend 定义了轻量级的数据载体，简洁且不可变。
+Converter 引入：
+使用了 BeanOutputConverter<List<BookRecommend>>。
+通过 converter.getFormat() 获取自动生成的 JSON Schema 指令。
+Prompt 改造：
+在模板中预留 {format} 占位符。
+添加“不要包含 markdown 代码块”的防御性指令，防止 JSON 解析失败。
+调用链升级：将 .call().content() 升级为 .call().entity(converter)，实现自动映射。
+3. 💡 关键成果 (Result)
+接口升级：/ai/recommend/json 接口上线。
+数据可用：成功返回了包含 5 个对象的 JSON 数组。
+JSON
+
+[
+  {"title": "哈利波特...", "reason": "奇幻冒险..."},
+  {"title": "小王子", "reason": "温柔诗意..."}
+]
+鲁棒性验证：即使模型倾向于输出 Markdown，配合 Prompt 约束也能稳定输出纯 JSON。
+4. 🧠 经验沉淀 (Key Takeaways)
+Converter 的魔法：Spring AI 的 Converter 本质上是在 Prompt 后面偷偷加了一段“咒语”（JSON Schema），这是 Prompt Engineering 的一种高级应用。
+泛型的处理：使用 ParameterizedTypeReference 解决了 Java 泛型擦除导致无法直接转换 List<T> 的问题。
+防御性 Prompt：LLM 有时候会“自作聪明”加 json 包裹内容，显式禁止这种行为可以减少解析错误。
