@@ -1,0 +1,23 @@
+📝 D19 项目总结：Simple Vector Store (向量知识库)
+1. 🎯 核心目的 (Purpose)
+私有知识注入：解决通用大模型（LLM）无法回答私有领域问题（如个人简历、公司内部文档）的缺陷。
+Embedding 初体验：理解如何将自然语言（Text）转化为计算机可计算的语义向量（Vector），从而实现“语义搜索”而非简单的“关键词匹配”。
+架构解耦：学习使用 Spring Boot 的 @Configuration 和 @Bean 将向量库的创建与使用分离，遵循依赖注入原则。
+2. 🔨 实施过程 (Actions)
+配置层 (RagConfig)：
+使用 @Configuration 标记配置类（踩坑点：漏加注解导致 Bean 无法扫描）。
+使用 SimpleVectorStore.builder(embeddingModel).build() 构建内存向量库，适配最新的 Spring AI API。
+控制层 (RagController)：
+通过构造器注入 VectorStore 接口，实现代码解耦。
+写入接口：接收文本 -> 封装 Document -> vectorStore.add() (自动触发 Embedding)。
+检索接口：接收查询词 -> similaritySearch() (计算余弦相似度) -> 提取文本 (使用 getText() 适配 API)。
+3. 💡 关键成果 (Result)
+语义检索验证：
+存入：“小明的电话号码是...”
+查询：“小明的联系方式是什么？”
+结果：成功返回了电话号码的文档。
+结论：证明系统理解了“联系方式”和“电话号码”在语义上是相关的，这是传统 SQL LIKE %联系方式% 做不到的。
+4. 🧠 经验沉淀 (Key Takeaways)
+Bean 的定义：在 Spring Boot 中，自定义的第三方组件（如 VectorStore）通常放在 @Configuration 类中用 @Bean 实例化，而不是在 Controller 里 new。
+API 版本敏感性：AI 框架迭代极快，遇到 protected access 或方法找不到时，优先查看源码或使用 Builder 模式，不要死记硬背旧代码。
+内存库的局限：SimpleVectorStore 是基于内存的，重启即失。适合 Demo 或测试，生产环境需迁移到 Redis/PgVector/Milvus。
