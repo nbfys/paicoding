@@ -1,0 +1,24 @@
+📝 D20 项目总结：RAG Complete Loop (完整 RAG 闭环)
+1. 🎯 核心目的 (Purpose)
+打通任督二脉：将 D19 的“检索能力”与 D17 的“生成能力”结合。
+上下文增强 (Context Injection)：理解 RAG 的本质——不是让 AI 重新训练（Fine-tuning），而是像“开卷考试”一样，把资料作为 Prompt 的一部分喂给 AI。
+幻觉控制 (Hallucination Control)：通过 Prompt 工程（“仅根据背景信息回答”），强制 AI 忽略其预训练知识，确保回答的准确性和可控性（在金融、法律领域尤为重要）。
+2. 🔨 实施过程 (Actions)
+Controller 升级：在 RagController 中同时注入 VectorStore (负责搜) 和 ChatClient (负责答)。
+三步走逻辑实现：
+Retrieve: 使用 vectorStore.similaritySearch(question) 获取 Top-K 相关文档。
+Augment: 将文档内容拼接成字符串，填入 PromptTemplate 的 {context} 变量中。
+Generate: 将包含“用户问题”和“背景资料”的最终 Prompt 发送给 LLM。
+Prompt 约束：编写了严格的系统指令：“如果背景信息中没有答案，请直接回答‘我不知道’”。
+3. 💡 关键成果 (Result)
+私有知识问答：
+问题：“作者喜欢喝什么？”
+背景：“...喜欢吃苹果...喜欢喝冰阔落...”
+回答：“冰阔落”。(验证了检索准确性和信息提取能力)
+边界防御：
+问题：“美国总统是谁？”
+回答：“我不知道”。(验证了Prompt 约束力，AI 没有调用其通识知识库)
+4. 🧠 经验沉淀 (Key Takeaways)
+RAG 的本质是 Prompt Engineering：代码只负责搬运数据，真正决定效果的是如何构建那个包含 {context} 的 Prompt 模板。
+数据即代码：在 AI 时代，写入向量库的数据质量（分段、清洗），直接决定了 AI 的智商。垃圾进，垃圾出 (GIGO)。
+无状态性：目前的实现是无状态的（没有多轮对话记忆），每次提问都是独立的。
