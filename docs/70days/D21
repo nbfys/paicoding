@@ -1,0 +1,20 @@
+📝 D21 项目总结：集成 Swagger 3
+1. 🎯 核心目的 (Purpose)
+文档自动化：解决前后端联调时“接口怎么调”、“参数传什么”的沟通成本问题。
+告别 Postman：为开发人员提供一个轻量级、在线的接口调试工具。
+标准化：遵循 OpenAPI 3 规范，为后续可能接入的网关或自动化测试打下基础。
+2. 🔨 实施过程 (Actions)
+依赖集成：引入 springdoc-openapi-starter-webmvc-ui。
+踩坑记录：遇到了 LiteWebJarsResourceResolver 类找不到的兼容性问题（Spring Boot 3.3 与 SpringDoc 新版的冲突），最终通过降级到 2.3.0 解决。
+配置类编写：创建 SwaggerConfig (或 OpenApiConfig)，配置了文档标题、版本和描述。
+注解美化：使用 @Tag 对 Controller 分组，使用 @Operation 对接口进行功能描述。
+3. 💡 关键成果 (Result)
+Swagger UI 页面 (/swagger-ui/index.html) 成功访问。
+所有 API（User, Book, AI, RAG）都被自动扫描并展示。
+能够通过网页界面直接触发 /ai/recommend/json 等接口并查看响应。
+4. 🧠 经验沉淀 (Key Takeaways)
+版本匹配是玄学：在 Spring Boot 生态中，第三方库（如 SpringDoc）并不总是能完美跟上 Spring Boot 的最新小版本（3.3.x）。遇到 NoClassDefFound 时，降级或寻找对应的兼容版本是常用手段。
+OpenAPI vs Swagger：
+Swagger 2 (@EnableSwagger2) 是旧时代的产物。
+OpenAPI 3 (SpringDoc) 是 Spring Boot 3 的标配。
+注解变了：@Api -> @Tag, @ApiOperation -> @Operation。
