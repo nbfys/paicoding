@@ -1,0 +1,19 @@
+📝 D22 项目总结：AOP 统一日志
+1. 🎯 核心目的 (Purpose)
+无侵入式监控：在不修改任何 Controller 现有代码的前提下，给所有接口加上“行车记录仪”。
+性能分析：通过记录 startTime 和结束时间的差值，精准定位系统的性能瓶颈（如 AI 接口耗时过长）。
+审计追踪：记录请求 IP 和参数，为后续的安全审计或 Bug 复现提供数据支持。
+2. 🔨 实施过程 (Actions)
+依赖引入：添加 spring-boot-starter-aop。
+切面定义：
+@Aspect + @Component 定义切面 Bean。
+@Pointcut("execution(...)") 精准锁定 Controller 层的所有方法。
+@Around 环绕通知，实现了“前置记录 + 方法执行 + 后置记录”的三明治逻辑。
+上下文获取：通过 RequestContextHolder 获取当前的 HttpServletRequest，从而拿到 IP、URL 等 HTTP 信息。
+3. 💡 关键成果 (Result)
+成功在控制台输出了结构化的日志。
+捕获到了 AI 接口的真实耗时（约 3.4 秒），量化了性能问题。
+4. 🧠 经验沉淀 (Key Takeaways)
+AOP 的力量：将通用逻辑（日志、事务、权限）从业务代码中剥离，符合 DRY (Don't Repeat Yourself) 原则。
+@Around vs @Before：如果需要统计耗时或修改返回值，必须用 @Around；如果只是简单记录日志，@Before + @AfterReturning 也可以。
+同步阻塞：目前的日志是同步打印的。如果日志量巨大，I/O 操作可能会轻微拖慢接口。在超高并发场景下，通常会配合消息队列（Kafka）做异步日志（那是架构师级别的事了，现在不必担心）。
