@@ -1,0 +1,18 @@
+📝 D24 项目总结：Spring Event (事件解耦)
+1. 🎯 核心目的 (Purpose)
+解耦 (Decoupling)：打破 Service 之间的强依赖。AiService 不需要依赖 LogService、PointService、EmailService...
+开闭原则 (OCP)：如果要新增“发邮件”功能，完全不需要修改 AiService 的代码，只需要写一个新的 Listener 即可。
+灵活编排：监听器可以是同步的（保证事务一致性），也可以是异步的（提升性能），完全由注解控制。
+2. 🔨 实施过程 (Actions)
+定义事件：继承 ApplicationEvent，封装数据载体 (AiCompletionEvent)。
+发布事件：在 Service 层注入 ApplicationEventPublisher，调用 publishEvent()。
+监听事件：编写 @Component 组件，使用 @EventListener 接收事件。
+异步监听：在 Listener 方法上叠加 @Async，实现监听逻辑的异步化。
+3. 💡 关键成果 (Result)
+主接口保持 2ms 极速响应。
+AI 任务完成后，自动触发了“日志记录”和“积分扣减”两个独立逻辑。
+验证了 task-1 (AI + 日志) 和 task-2 (积分) 的多线程协作。
+4. 🧠 经验沉淀 (Key Takeaways)
+观察者模式：Spring Event 是观察者模式的标准实现。
+事务问题：默认的同步监听器会和发布者在同一个事务中。如果监听器报错，发布者的事务也会回滚（这在某些场景下是好事，比如扣积分失败则 AI 记录也不存）。
+事件源：new AiCompletionEvent(this, ...) 中的 this 是事件源，有时可以用来传递 Service 本身，方便监听器回调（虽然不推荐）。
