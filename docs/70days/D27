@@ -1,0 +1,19 @@
+📝 D27 项目总结：SSE 流式输出与乱码之战
+1. 🎯 核心目的 (Purpose)
+用户体验升级：从“同步等待”升级为“实时反馈”，让 AI 的长文本生成不再枯燥。
+协议攻坚：掌握 HTTP 流式传输（Streaming）的基本原理。
+乱码排查：深刻理解 UTF-8 多字节字符在流式传输中可能被截断（Token 切片）的问题。
+2. 🔨 实施过程 (Actions)
+Service 层：调用 chatClient.prompt().stream() 获取 Flux<String>。
+Controller 层：
+尝试了 Flux<String> 直接返回（遇到了 WebFlux 依赖冲突）。
+尝试了 SseEmitter（Spring MVC 原生方案）。
+最终解法：通过调整 produces 为 text/html;charset=UTF-8，强制统一了前后端的编码格式。
+前端验证：编写了 chat.html，使用 EventSource（或直接浏览器访问）验证流式效果。
+3. 💡 关键成果 (Result)
+访问 /ai/chat/stream?msg=...，浏览器不再转圈圈等待，而是逐字/逐句蹦出中文内容。
+解决了困扰许久的“锟斤拷”乱码问题。
+4. 🧠 经验沉淀 (Key Takeaways)
+WebFlux vs MVC：在 Spring Boot 中，引入 spring-boot-starter-webflux 会导致底层容器和路由配置的冲突。在 MVC 项目中做流式，首选 SseEmitter 或只引入 reactor-core。
+编码的最后一公里：乱码问题往往发生在“网关”或“转换器”层。明确指定 charset=UTF-8 是最直接的解法。
+Token 切片：理解 LLM 是按 Token 生成的，而一个 Token 不等于一个完整的 UTF-8 字符。如果在字节流层面截断，必出乱码。这也是为什么后端要尽量传输完整的 String 对象。
