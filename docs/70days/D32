@@ -1,0 +1,13 @@
+📅 D32：内部标准接口构建 (Internal API Build)
+🎯 核心目的
+将 AI 能力“黑盒化”。Paicoding 不需要知道 AI 怎么流式输出、怎么配置 Key，它只需要像调普通函数一样调用接口。我们需要提供一个同步、稳定、结构化的 HTTP 接口。
+
+🛠️ 怎么实现的
+
+协议定义：设计了标准 DTO (AiSummaryRequest/Response)，规定了“标题+内容”进，“摘要+状态”出的契约。
+同步改造：在 AiService 中新增 generateSummary 方法，使用 .call() 替代 .stream()，将流式响应聚合为一次性返回，降低调用方处理难度。
+接口暴露：开发 InnerAiController，提供 POST /inner/ai/summary 接口，并增加了参数校验和异常兜底。
+✅ 最终结果
+
+接口可用：通过 Browser Console 的 fetch 测试，成功连通。
+验证证据：输入测试文章，API 正确返回了 JSON 格式的摘要（“标志着框架全面拥抱现代...”），证明 AI 大脑已准备好对外服务。

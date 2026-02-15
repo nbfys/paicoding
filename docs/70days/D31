@@ -1,0 +1,15 @@
+📅 D31：双环境并行初始化 (Environment Setup)
+🎯 核心目的
+解决“新旧技术栈不兼容”的根本矛盾。paicoding 依赖 JDK 8，而 Spring AI 必须用 JDK 17。为了避免对老系统进行高风险的升级改造，我们确立了 “双服务共存 (Sidecar Pattern)” 的架构策略。
+
+🛠️ 怎么实现的
+
+架构隔离：将 helloworld 项目重命名为 ai-service，作为独立进程运行。
+端口规划：
+ai-service (JDK 17) -> 8081 (修改 application.properties)。
+paicoding (JDK 8) -> 8082 (默认 8080 被占用，自动或手动切换)。
+环境配置：在 IDEA 中分别配置两个模块的 Project SDK，确保互不干扰。
+✅ 最终结果
+
+双活状态：两个 Spring Boot 应用在同一台机器上同时启动成功。
+验证证据：日志显示 ai-service 定时任务正常运行，paicoding 页面可访问。建立了物理上的“跨时代”连接基础。
