@@ -1,0 +1,14 @@
+D33 复盘：跨系统桥梁搭建
+🎯 核心目的
+让 JDK 8 的 Paicoding 能够像调用本地方法一样，远程调用 JDK 17 的 ai-service。
+这是**“新老共存”**架构的核心一步。
+
+🛠️ 怎么实现的
+
+AiClient 封装：编写 AiClient 类，屏蔽了底层的 HTTP 请求细节。
+DTO 镜像：在 Paicoding 中创建 AiSummaryReq/Resp，确保双方使用相同的“通信语言”。
+JSON 强制：解决了 RestTemplate 默认使用 XML 导致的 415 Unsupported Media Type 错误，显式指定了 application/json。
+✅ 最终结果
+
+连通性验证：AiClientTest 运行通过，成功调用 AI 接口并返回了摘要。
+关于耗时：你提到的“13秒467毫秒”是 Spring Boot 容器启动的正常耗时（包括加载 MyBatis、HikariCP 等），并不代表 HTTP 调用本身慢。真正的 HTTP 调用耗时大约在 1-3 秒左右（取决于 AI 生成速度）。
