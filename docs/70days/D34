@@ -1,0 +1,13 @@
+📅 D34：数据持久化 (Daily Summary)
+🎯 核心目的
+为 AI 摘要功能构建存储层，确保生成的摘要能持久化保存，避免重复调用 AI（省钱、提速）。
+
+🛠️ 怎么实现的
+
+Schema 建设：在 pai_coding 库中创建了 article_ai_summary 表。
+ORM 映射：编写了 ArticleAiSummaryDO (实体) 和 ArticleAiSummaryMapper (接口)。
+单元测试：编写 ArticleAiSummaryTest，验证了 Mybatis-Plus 的 insert 和 select 功能。
+✅ 最终结果
+
+测试通过：控制台输出 ✅ 数据库读写测试通过！。
+能力具备：Paicoding 现在不仅能“说话”（调用 AI），还能“记忆”（存取数据库）。
