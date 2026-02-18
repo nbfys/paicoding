@@ -65,7 +65,7 @@ paicoding:
 
 # 默认的数据库名
 database:
-  name: pai_coding
+  name: paicoding
 
 # mybatis 相关统一配置
 mybatis-plus:

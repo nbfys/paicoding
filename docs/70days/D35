@@ -1,0 +1,18 @@
+📅 D35：业务逻辑闭环 (Service Layer)
+🎯 核心目的
+将 D33 (AiClient) 和 D34 (Database Mapper) 串联起来，实现完整的“查库 -> 调 AI -> 入库 -> 返回”业务流程。
+同时解决遗留系统的环境配置坑（数据库名不一致、Liquibase 初始化失败）。
+
+🛠️ 怎么实现的
+
+Service 层：编写 AiSummaryServiceImpl，实现了核心业务逻辑（缓存优先策略）。
+Controller 层：暴露 GET /api/ai/summary 接口，对接前端请求。
+环境排坑 (Troubleshooting)：
+发现：代码运行成功但数据库无数据 -> 定位：代码连的是 pai_coding，工具看的是 paicoding。
+解决：统一库名为 paicoding。
+副作用：Liquibase 报错表已存在/不存在 -> 终极方案：手动创建 DATABASECHANGELOG 表，引导 Liquibase 正常初始化。
+✅ 最终结果
+
+接口可用：访问 http://localhost:8082/api/ai/summary?articleId=1 成功返回 JSON。
+数据落地：数据库 article_ai_summary 表中成功插入了 article_id=1 的摘要记录。
+性能提升：第二次访问该接口时，直接命中数据库，响应速度从 3s+ 降至毫秒级。
