@@ -1,0 +1,16 @@
+📅 D36：异步与事件解耦 (Daily Summary)
+🎯 核心目的
+解决“用户发布文章需等待 AI 生成”的性能问题。
+通过 Spring Event + @Async，将耗时的 AI 任务从主线程剥离，放入后台线程池执行。
+
+🛠️ 怎么实现的
+
+基础设施 (ThreadPoolConfig)：配置了名为 taskExecutor 的线程池，专门处理 AI 任务。解决多模块包扫描问题，将其移动到 Web 模块。
+事件定义 (ArticlePublishEvent)：创建了携带文章信息的事件对象。
+消费者 (ArticleAiListener)：编写了监听器，使用 @Async("taskExecutor") 确保在新线程中运行，并调用 AiSummaryService。
+单元测试 (AsyncEventTest)：验证了“主线程不阻塞、子线程异步执行”的效果。
+✅ 最终结果
+
+主线程：瞬间打印 "1...2...3"，耗时几乎为 0。
+子线程：Ai-Async-1 随后启动，执行了摘要生成逻辑（且命中了缓存）。
+价值：用户体验极大提升（发布文章秒响应），系统吞吐量增加。
