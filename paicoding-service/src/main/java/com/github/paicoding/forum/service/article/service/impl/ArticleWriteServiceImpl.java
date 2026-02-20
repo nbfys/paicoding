@@ -17,11 +17,13 @@ import com.github.paicoding.forum.service.article.repository.dao.ArticleTagDao;
 import com.github.paicoding.forum.service.article.repository.entity.ArticleDO;
 import com.github.paicoding.forum.service.article.service.ArticleWriteService;
 import com.github.paicoding.forum.service.article.service.ColumnSettingService;
+import com.github.paicoding.forum.service.article.service.event.ArticlePublishEvent;
 import com.github.paicoding.forum.service.image.service.ImageService;
 import com.github.paicoding.forum.service.user.service.AuthorWhiteListService;
 import com.github.paicoding.forum.service.user.service.UserFootService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -61,6 +63,9 @@ public class ArticleWriteServiceImpl implements ArticleWriteService {
     @Autowired
     private AuthorWhiteListService articleWhiteListService;
 
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+
     // 构造方法的注入方式
     public ArticleWriteServiceImpl(ArticleDao articleDao, ArticleTagDao articleTagDao) {
         this.articleDao = articleDao;
@@ -77,24 +82,38 @@ public class ArticleWriteServiceImpl implements ArticleWriteService {
     public Long saveArticle(ArticlePostReq req, Long author) {
         ArticleDO article = ArticleConverter.toArticleDo(req, author);
         String content = imageService.mdImgReplace(req.getContent());
-        return transactionTemplate.execute(new TransactionCallback<Long>() {
+
+        // 1. 执行事务 (保存文章到数据库)
+        Long articleId = transactionTemplate.execute(new TransactionCallback<Long>() {
             @Override
             public Long doInTransaction(TransactionStatus status) {
-                Long articleId;
+                Long id;
                 if (NumUtil.nullOrZero(req.getArticleId())) {
-                    articleId = insertArticle(article, content, req.getTagIds());
+                    id = insertArticle(article, content, req.getTagIds());
                     log.info("文章发布成功! title={}", req.getTitle());
                 } else {
-                    articleId = updateArticle(article, content, req.getTagIds());
+                    id = updateArticle(article, content, req.getTagIds());
                     log.info("文章更新成功！ title={}", article.getTitle());
                 }
                 if (req.getColumnId() != null) {
                     // 更新文章对应的专栏信息
-                    columnSettingService.saveColumnArticle(articleId, req.getColumnId());
+                    columnSettingService.saveColumnArticle(id, req.getColumnId());
                 }
-                return articleId;
+                return id;
             }
         });
+
+        // >>>>>> D37 新增逻辑 (事务提交后执行) >>>>>>
+        // 只有当 articleId 存在 (保存成功) 时，才触发 AI 摘要
+        if (articleId != null) {
+            // 异步发布事件，不阻塞主线程
+            // 注意：req.getContent() 可能包含原始 Markdown，imageService 处理后的 content 更适合给 AI
+            // 但为了简单，直接传 req.getTitle() 和 content
+            applicationEventPublisher.publishEvent(new ArticlePublishEvent(this, articleId, req.getTitle(), content));
+        }
+        // <<<<<< D37 新增逻辑结束 <<<<<<
+
+        return articleId;
     }
 
     /**
