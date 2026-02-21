@@ -7,7 +7,12 @@ import com.github.paicoding.forum.service.article.repository.entity.ArticleAiSum
 import com.github.paicoding.forum.service.article.repository.mapper.ArticleAiSummaryMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 @Slf4j
 @Service
@@ -21,38 +26,70 @@ public class AiSummaryServiceImpl implements AiSummaryService {
 
     @Override
     public String getSummary(Long articleId, String title, String content) {
-        // 1. 先查数据库
         ArticleAiSummaryDO exist = summaryMapper.selectOne(
                 new LambdaQueryWrapper<ArticleAiSummaryDO>()
                         .eq(ArticleAiSummaryDO::getArticleId, articleId)
         );
 
-        if (exist != null) {
-            log.info("文章摘要命中数据库缓存: articleId={}", articleId);
+        // 只有状态为成功 (1) 才返回摘要，否则返回提示或 null
+        if (exist != null && Integer.valueOf(1).equals(exist.getStatus())) {
             return exist.getSummary();
         }
+        return null;
+    }
 
-        // 2. 数据库没有，调用 AI 生成
-        log.info("文章摘要未命中，开始调用 AI 生成: articleId={}", articleId);
+    /**
+     * 核心生成逻辑 (写逻辑，加上重试)
+     * @Retryable: 遇到任何 Exception 重试，最多 3 次，间隔 2 秒
+     */
+    @Override
+    @Retryable(value = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 2000))
+    public void generateSummary(Long articleId, String title, String content) {
+        log.info(">>> 开始生成摘要 (可能重试)... articleId={}", articleId);
+
+        // 1. 调 AI (如果 AI 挂了，这里会抛异常，触发重试)
         String summary = aiClient.getSummary(title, content);
 
-        // 3. AI 生成失败（返回 null），直接返回默认提示，不入库
-        if (summary == null) {
-            return "摘要生成中，请稍后再试...";
+        if (summary == null || summary.isEmpty()) {
+            throw new RuntimeException("AI 生成摘要为空，触发重试");
         }
 
-        // 4. AI 生成成功，入库保存
-        try {
-            ArticleAiSummaryDO newRecord = new ArticleAiSummaryDO()
+        // 2. 入库 (先查后插/更新)
+        saveOrUpdate(articleId, summary, 1, null);
+        log.info("<<< 摘要生成并入库成功! articleId={}", articleId);
+    }
+
+    /**
+     * 重试耗尽后的兜底方法 (Recover)
+     */
+    @Recover
+    public void recover(Exception e, Long articleId, String title, String content) {
+        log.error("!!! 重试 3 次均失败，放弃生成。articleId={}, err={}", articleId, e.getMessage());
+
+        // 记录失败状态 (status=2) 和错误信息
+        saveOrUpdate(articleId, "", 2, e.getMessage());
+    }
+
+    /**
+     * 辅助方法：保存或更新记录
+     */
+    private void saveOrUpdate(Long articleId, String summary, Integer status, String errorMsg) {
+        ArticleAiSummaryDO record = summaryMapper.selectOne(
+                new LambdaQueryWrapper<ArticleAiSummaryDO>().eq(ArticleAiSummaryDO::getArticleId, articleId)
+        );
+
+        if (record == null) {
+            record = new ArticleAiSummaryDO()
                     .setArticleId(articleId)
-                    .setSummary(summary);
-            summaryMapper.insert(newRecord);
-            log.info("文章摘要入库成功: articleId={}", articleId);
-        } catch (Exception e) {
-            // 可能是并发导致重复插入，捕获异常，不要影响返回
-            log.warn("文章摘要入库失败 (可能是并发重复): {}", e.getMessage());
+                    .setSummary(summary)
+                    .setStatus(status)
+                    .setErrorMsg(errorMsg == null ? "" : errorMsg.substring(0, Math.min(500, errorMsg.length())));
+            summaryMapper.insert(record);
+        } else {
+            record.setSummary(summary)
+                    .setStatus(status)
+                    .setErrorMsg(errorMsg == null ? "" : errorMsg.substring(0, Math.min(500, errorMsg.length())));
+            summaryMapper.updateById(record);
         }
-
-        return summary;
     }
 }

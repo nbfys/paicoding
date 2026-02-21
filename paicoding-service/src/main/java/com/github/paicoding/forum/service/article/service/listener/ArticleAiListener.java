@@ -27,7 +27,7 @@ public class ArticleAiListener {
 
         try {
             // 调用昨天的业务逻辑
-            aiSummaryService.getSummary(event.getArticleId(), event.getTitle(), event.getContent());
+            aiSummaryService.generateSummary(event.getArticleId(), event.getTitle(), event.getContent());
 
         } catch (Exception e) {
             log.error("异步生成摘要失败: {}", e.getMessage());

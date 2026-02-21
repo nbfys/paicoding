@@ -9,4 +9,5 @@ public interface AiSummaryService {
      * @return 摘要内容
      */
     String getSummary(Long articleId, String title, String content);
+    void generateSummary(Long articleId, String title, String content);
 }

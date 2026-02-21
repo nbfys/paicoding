@@ -1,0 +1,16 @@
+📅 D38：重试与鲁棒性 (Daily Summary)
+🎯 核心目的
+防止 AI 服务抖动导致任务直接丢弃。
+通过 Spring Retry 实现自动重试，确保存活率；通过 Recover 实现失败兜底，确保数据可追溯。
+
+🛠️ 怎么实现的
+
+Schema 升级：增加 status (0/1/2) 和 error_msg 字段。
+Service 拆分：将 getSummary (读) 和 generateSummary (写) 分离。
+重试逻辑：在 generateSummary 上添加 @Retryable(maxAttempts=3)，在 recover 方法中处理最终失败逻辑。
+AOP 适配：让 Listener 直接调用带注解的 Service 方法，避免 AOP 失效。
+✅ 最终结果
+
+正常场景：一次通过，状态为 1。
+异常场景：重试 3 次后放弃，状态为 2，错误信息记录在案。
+价值：极大提高了系统的稳定性，即使 AI 服务短暂挂掉，只要在这几秒内恢复，任务就能自动成功；即使没恢复，也留下了“案底”供后续补偿。

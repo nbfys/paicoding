@@ -31,4 +31,10 @@ public class ArticleAiSummaryDO implements Serializable {
     private Date createTime;
 
     private Date updateTime;
+    /**
+     * 状态: 0-初始化, 1-成功, 2-失败
+     */
+    private Integer status;
+
+    private String errorMsg;
 }
