@@ -179,6 +179,11 @@ public class ArticleDTO implements Serializable {
      */
     private String payWay;
 
+    /**
+     * AI 摘要 (D39 新增)
+     */
+    private String aiSummary;
+
     public ArticleDTO setAuthorAvatar(String authorAvatar) {
         this.authorAvatar = CdnUtil.autoTransCdn(authorAvatar);
         return this;

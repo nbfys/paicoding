@@ -75,6 +75,16 @@
     </div>
   </div>
 
+  <div class="ai-summary-card" th:if="${not #strings.isEmpty(article.aiSummary)}"
+       style="background: #f6f8fa; border-left: 4px solid #42b983; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+    <div style="font-weight: bold; color: #42b983; margin-bottom: 8px;">
+      <i class="fa fa-magic"></i> AI 智能摘要
+    </div>
+    <div th:text="${article.aiSummary}" style="color: #666; font-size: 14px; line-height: 1.6;">
+      这里是摘要内容...
+    </div>
+  </div>
+
   <div id="articleContent" class="article-content" th:utext="${article.content}">
   </div>
 

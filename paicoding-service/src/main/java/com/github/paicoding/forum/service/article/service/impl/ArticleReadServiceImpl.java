@@ -18,6 +18,7 @@ import com.github.paicoding.forum.api.model.vo.constants.StatusEnum;
 import com.github.paicoding.forum.api.model.vo.user.dto.BaseUserInfoDTO;
 import com.github.paicoding.forum.core.util.ArticleUtil;
 import com.github.paicoding.forum.core.util.SpringUtil;
+import com.github.paicoding.forum.service.ai.service.AiSummaryService;
 import com.github.paicoding.forum.service.article.conveter.ArticleConverter;
 import com.github.paicoding.forum.service.article.repository.dao.ArticleDao;
 import com.github.paicoding.forum.service.article.repository.dao.ArticleTagDao;
@@ -87,6 +88,9 @@ public class ArticleReadServiceImpl implements ArticleReadService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private AiSummaryService aiSummaryService;
+
     // 是否开启ES
     @Value("${elasticsearch.open:false}")
     private Boolean openES;
@@ -120,16 +124,35 @@ public class ArticleReadServiceImpl implements ArticleReadService {
 
     @Override
     public ArticleDTO queryDetailArticleInfo(Long articleId) {
+        // 1. 查基础文章信息 (原有逻辑)
         ArticleDTO article = articleDao.queryArticleDetail(articleId);
         if (article == null) {
             throw ExceptionUtil.of(StatusEnum.ARTICLE_NOT_EXISTS, articleId);
         }
-        // 更新分类相关信息
-        CategoryDTO category = article.getCategory();
-        category.setCategory(categoryService.queryCategoryName(category.getCategoryId()));
 
-        // 更新标签信息
+        // 2. 更新分类信息 (原有逻辑)
+        CategoryDTO category = article.getCategory();
+        if (category != null) {
+            category.setCategory(categoryService.queryCategoryName(category.getCategoryId()));
+        }
+
+        // 3. 更新标签信息 (原有逻辑)
         article.setTags(articleTagDao.queryArticleTagDetails(articleId));
+
+        // >>>>>> D39 新增逻辑: 填充 AI 摘要 >>>>>>
+        try {
+            // 调用我们写的 getSummary 方法 (它内部会查库，有就返回，没有返回 null)
+            // 注意：这里传 article.getTitle() 和 article.getContent()
+            String aiText = aiSummaryService.getSummary(articleId, article.getTitle(), article.getContent());
+            if (aiText != null && !aiText.isEmpty()) {
+                article.setAiSummary(aiText);
+            }
+        } catch (Exception e) {
+            // 捕获所有异常，绝不因为 AI 模块故障导致文章详情页打不开 (降级处理)
+            log.warn("文章详情页获取 AI 摘要失败，降级处理: {}", e.getMessage());
+        }
+        // <<<<<< D39 新增结束 <<<<<<
+
         return article;
     }
 

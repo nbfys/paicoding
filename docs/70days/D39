@@ -1,0 +1,14 @@
+📅 D39：前端展示与体验优化 (Final Summary)
+🎯 核心目的
+在文章详情页优雅地展示 AI 生成的摘要，提升阅读体验，同时做好降级处理（无摘要时不显示）。
+
+🛠️ 怎么实现的
+
+DTO 增强：在 ArticleDTO 中新增 aiSummary 字段，专门承载 AI 数据。
+Service 填充：在 ArticleReadServiceImpl 中查询 article_ai_summary 表，填充 aiSummary。
+前端渲染：修改 article-detail.html 组件，使用 th:if 判断摘要是否存在，动态渲染绿色的摘要卡片。
+✅ 最终结果
+
+正常显示：对于已生成摘要的文章，显示专业的 AI 总结内容。
+异常隐身：对于生成失败或还在生成的文章，摘要卡片完全隐藏，界面干净整洁。
+样式美观：绿色的卡片设计突出了 AI 元素，与技术社区风格协调。
