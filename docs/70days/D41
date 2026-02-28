@@ -1,0 +1,41 @@
+📅 D41 复盘：Docker 容器化与灾难恢复 (Containerization & Disaster Recovery)
+1. 核心目标
+将 paicoding (JDK 8) 和 ai-service (JDK 17) 两个异构服务，以及 MySQL、Redis 基础设施，全部打包进 Docker 容器，实现 一键编排启动 (Orchestration)，解决“环境一致性”问题。
+
+2. 遭遇的灾难 (The Incident)
+事故现象: 在配置 Docker 镜像源时，因 JSON 格式错误导致 Docker Desktop 崩溃。用户尝试“恢复出厂设置 (Reset to factory defaults)”。
+后果: 所有本地容器、镜像被清空。运行在 Docker 中的 MySQL 和 Redis 数据（包括表结构、AI 摘要数据）全部丢失。
+定性: P0 级数据丢失事故（开发环境）。
+3. 救援与重建 (Recovery Actions)
+我们没有重写代码，而是通过 “基础设施即代码 (IaC)” 的思维重建了环境：
+
+3.1 基础设施重建
+使用 docker-compose-env.yml 快速拉起了 mysql:8.0 和 redis:6.2 容器。
+经验: 数据卷挂载 (volumes) 是保命的关键，这次吸取教训挂载了本地目录。
+3.2 数据恢复 (Schema Restore)
+手工重建了数据库 paicoding。
+手工执行了关键表 SQL：article_ai_summary (D34产物) 和 DATABASECHANGELOG (Liquibase 必需)。
+利用 Liquibase 的自动执行机制，恢复了 90% 的业务表结构。
+3.3 网络孤岛打通 (Networking)
+问题: paicoding 容器无法连接 ai-service (Connection refused) 和 mysql。
+根因: 容器间网络隔离，localhost 指向容器自身而非宿主机。
+解决:
+统一使用 docker-compose.yml 编排 4 个服务，放入同一网络 pai-net。
+修改 AiClient.java，支持从环境变量读取 URL。
+在 Compose 中配置 AI_SERVICE_URL=http://ai-service:8081/...，利用 Docker 内部 DNS 解析服务名。
+3.4 镜像构建 (Build)
+问题: Docker Hub 被墙，openjdk 基础镜像拉不下来。
+解决: 替换为阿里云镜像源 (registry.cn-hangzhou.aliyuncs.com/...)。
+问题: COPY 失败，找不到 jar 包。
+解决: 修正 Dockerfile 中的相对路径，并重新执行 Maven 打包。
+4. 最终交付物 (Deliverables)
+完整版 docker-compose.yml:
+包含 MySQL, Redis, Paicoding, Ai-Service。
+配置了 SPRING_AI_DASHSCOPE_API_KEY 和 AI_SERVICE_URL。
+Dockerized App:
+docker ps 显示 4 个容器全部 Up。
+访问 localhost:8082 页面正常，且能成功生成 AI 摘要（证明全链路互通）。
+5. 关键教训 (Lessons Learned)
+配置备份: 修改关键配置（如 daemon.json）前必备份。
+切勿重置: 遇到软件报错先查日志，绝不轻易点击“恢复出厂设置”。
+配置代码化: 所有的环境配置（URL, Key, Port）都必须支持外部注入（环境变量），不能硬编码在 Java 代码里。

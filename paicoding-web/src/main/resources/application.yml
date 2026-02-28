@@ -104,12 +104,20 @@ knife4j:
 
 logging:
   level:
-    com.github.paicoding.forum.service.rank.service.impl.*: debug # 指定具体包下的日志输出级别
+    com.github.paicoding.forum.service.rank.service.impl.*: debug
+    # 增加你的 AI Service 日志级别，方便调试
+    com.github.paicoding.forum.service.ai: debug
     org:
       springframework:
         web:
           servlet:
-            handler.*: info # 定位为啥无妨访问swagger-ui时，可以把这个日志输出级别设置debug
+            handler.*: info
+  pattern:
+    # ✅ D43 关键修改：增加 [%X{traceId}]
+    # 原始默认格式通常是: %d{...} [%thread] %-5level %logger{50} - %msg%n
+    # 我们插进去一个 traceId
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId}] %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId}] %logger{50} - %msg%n"
 
 
 # 监控相关配置

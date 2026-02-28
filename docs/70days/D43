@@ -1,0 +1,19 @@
+📅 D43 每日复盘：系统可观测性 (Observability)
+1. 核心目的 (Purpose)
+消除盲区：解决分布式系统中日志割裂的问题，确保一个用户请求引发的所有后续动作（无论是在异步线程中，还是在远程服务中）都能被唯一标识符串联起来。
+快速定位：当线上出现问题时，只需一个 TraceId，即可在海量日志中秒级定位到全链路的执行轨迹。
+2. 执行动作 (Key Actions)
+基础设施建设：
+在 Paicoding 中实现了 TraceIdInterceptor，为每个请求生成唯一 ID 并存入 MDC。
+在 Sidecar (AI Service) 中改造了 InnerAiController，实现了从 HTTP Header 提取 ID 反向注入 MDC 的逻辑。
+跨服务透传：
+改造 AiClient，在发起 HTTP 请求时自动将 MDC 中的 traceId 注入 Request Header。
+跨线程透传 (难点攻克)：
+发现了 @Async 异步线程导致 TraceId 丢失的问题。
+重构了 ThreadPoolConfig，引入 TaskDecorator 装饰器模式，成功实现了主线程到子线程的 MDC 上下文复制。
+可视化验证：
+统一了 Logback/Properties 的日志格式配置，确保 ID 在控制台中显形。
+3. 最终结果 (Outcome)
+✅ 全链路打通：验证了从 Paicoding 主线程 -> 异步线程 -> HTTP 网络 -> Sidecar 服务内部的 ID 完整传递。
+✅ 无侵入性：业务代码（如 ArticleWriteService）无需感知 TraceId 的存在，完全由底层基础设施自动处理。
+✅ 调试效率提升：现在配合 Swagger 或发布文章，你可以清晰地看到一次操作背后的所有微服务交互细节。

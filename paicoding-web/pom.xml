@@ -21,6 +21,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi2-spring-boot-starter</artifactId>
+            <version>${knife4j.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.github.paicoding.forum</groupId>
             <artifactId>paicoding-ui</artifactId>
         </dependency>
@@ -258,6 +264,19 @@
                         <goals>
                             <goal>compile</goal>
                             <goal>compileTests</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- 新增：Spring Boot 打包插件 -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.7.14</version> <!-- 这里手动指定一个稳妥的版本 -->
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal> <!-- 关键：把依赖打进去 -->
                         </goals>
                     </execution>
                 </executions>

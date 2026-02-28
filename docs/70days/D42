@@ -1,0 +1,16 @@
+📅 D42 每日复盘：接口契约与文档治理 (Interface Governance)
+1. 核心目的 (Purpose)
+拒绝黑盒：将 Paicoding 与 AI Service 的交互细节公开化、透明化。
+确立契约：明确输入（Request）与输出（Response）的数据结构，为前端联调、自动化测试以及未来的服务熔断（Fallback）提供法律依据。
+提升效率：通过可视化界面（Knife4j）直接进行接口调试，替代 Postman/Curl 手动拼参数的低效方式。
+2. 执行动作 (Key Actions)
+环境切换：成功将开发模式从“全 Docker 部署”切换为“本地 IDEA 开发 + Docker 基础设施（MySQL/Redis）”，恢复了热部署调试能力。
+配置补全：发现了原项目 Swagger 配置隐蔽/缺失的问题，手动创建了 SwaggerConfig，接管了文档控制权。
+代码重构：
+DTO 层：改造 AiSummaryReq 和 AiSummaryResp，添加 @ApiModelProperty，明确了字段含义（如 summary）、必填性及示例值。
+Controller 层：改造 AiSummaryController，使用 @ApiOperation 替换了模糊的 Javadoc，并特别标注了“首次生成较慢”的业务特性。
+依赖治理：理清了 Spring Boot 2.7 与 Knife4j (Swagger) 的版本关系，成功集成并启动。
+3. 最终结果 (Outcome)
+✅ 文档可视化：访问 http://localhost:8082/doc.html 成功，界面清晰展示了“AI 摘要服务”分组。
+✅ 交互可调试：验证了 getSummary 接口，确认了参数说明（articleId）和响应结构在文档中准确呈现。
+✅ 无报错启动：解决了潜在的包冲突，系统在本地环境中运行稳定。
