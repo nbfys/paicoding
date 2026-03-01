@@ -12,6 +12,18 @@
     <artifactId>paicoding-service</artifactId>
 
     <dependencies>
+        <!-- D44Resilience4j 熔断器 (适配 Spring Boot 2.x) -->
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot2</artifactId>
+            <version>1.7.0</version> <!-- 推荐稳定版 -->
+        </dependency>
+        <!-- 需要 AOP 支持 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.github.paicoding.forum</groupId>
             <artifactId>paicoding-core</artifactId>

@@ -2,6 +2,7 @@ package com.github.paicoding.forum.web.front.ai;
 
 import com.github.paicoding.forum.api.model.vo.ResVo;
 import com.github.paicoding.forum.api.model.vo.article.dto.ArticleDTO;
+import com.github.paicoding.forum.service.ai.AiClient;
 import com.github.paicoding.forum.service.ai.service.AiSummaryService;
 import com.github.paicoding.forum.service.article.service.ArticleReadService;
 import io.swagger.annotations.Api;
@@ -20,7 +21,17 @@ public class AiSummaryController {
 
     @Autowired
     private ArticleReadService articleReadService;
+    @Autowired
+    private AiClient aiClient; // 注入这个带有 @CircuitBreaker 的 Client
 
+    @ApiOperation(value = "强制测试 AI 熔断", notes = "直接调用 Client，绕过数据库缓存")
+    @GetMapping("/test/force")
+    public ResVo<String> testForce() {
+        // 直接调用 AI Client，不管有没有缓存
+        // 传入一些假数据
+        String summary = aiClient.getSummary("熔断测试标题", "熔断测试内容......");
+        return ResVo.ok(summary);
+    }
     /**
      * 获取文章摘要
      * 这里的逻辑是：如果数据库有直接返回，没有则调用AI生成并入库

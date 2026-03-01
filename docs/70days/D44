@@ -1,0 +1,16 @@
+📅 D44 每日复盘：高可用熔断 (Circuit Breaking)
+1. 核心目的 (Purpose)
+防止雪崩：当 AI Service 挂掉或响应极慢时，防止 Paicoding 的线程资源被耗尽。
+用户体验：给用户返回友好的“服务繁忙”提示，而不是冷冰冰的 HTTP 500 或无限转圈。
+系统韧性：赋予系统自我恢复的能力（熔断一段时间后自动尝试重连）。
+2. 执行动作 (Key Actions)
+引入依赖：在 paicoding-web (实际生效层) 引入了 resilience4j-spring-boot2。
+配置规则：在 application.yml 中定义了 aiServiceBreaker 实例，设置了 50% 失败率阈值和 10s 熔断时间。
+代码改造：
+在 AiClient 中使用 @CircuitBreaker 注解，并实现了 getSummaryFallback 降级逻辑。
+为了测试方便，在 AiSummaryController 中新增了 testForce 接口，绕过数据库缓存直接调用 AI。
+故障模拟：通过停止 Sidecar 服务，人为制造了连接拒绝异常。
+3. 最终结果 (Outcome)
+✅ 熔断生效：当 Sidecar 不可用时，接口迅速返回了预设的 fallback 文案 AI摘要暂时不可用。
+✅ 服务降级：前端收到了 code: 0 (成功) 的响应，而不是报错，保证了页面其他功能（如文章详情展示）不受影响。
+✅ 资源保护：后续请求不再尝试建立 TCP 连接，直接走内存逻辑返回，极大地节省了系统资源。
